@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Productivity Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header id="main-header">
+    <div class="header-left">
+      <div id="greeting"></div>
+    </div>
+    <div class="header-center">
+      <div id="clock"></div>
+    </div>
+    <div class="header-right">
+      <select id="timezone-select"></select>
+      <button id="theme-toggle">🌙</button>
+    </div>
+  </header>
+  <main>
+    <section id="todo">
+      <h2>To-Do List</h2>
+      <input id="new-task" placeholder="Add a task..."/>
+      <div id="todo-controls">
+        <button id="filter-all">All</button>
+        <button id="filter-active">Active</button>
+        <button id="filter-completed">Completed</button>
+        <button id="clear-all">Clear All</button>
+        <span id="task-count"></span>
+      </div>
+      <ul id="tasks"></ul>
+    </section>
+    <section id="notes">
+      <h2>Quick Notes</h2>
+      <div id="notes-controls">
+        <button id="add-note">Add Note</button>
+        <button id="export-notes">Export</button>
+      </div>
+      <div id="notes-list"></div>
+    </section>
+    <section id="weather">
+      <h2>Weather</h2>
+      <div id="weather-controls">
+        <input id="weather-city" placeholder="Enter city..." />
+        <button id="weather-search">Search</button>
+        <button id="weather-unit">°C</button>
+      </div>
+      <div id="weather-info"></div>
+    </section>
+    <section id="links">
+      <h2>Quick Links</h2>
+      <div id="links-controls">
+        <input id="new-link-name" placeholder="Name (e.g. Google)" />
+        <input id="new-link-url" placeholder="URL (e.g. https://google.com)" />
+        <input id="new-link-group" placeholder="Group (optional)" />
+        <button id="add-link">Add Link</button>
+      </div>
+      <div id="links-groups"></div>
+    </section>
+  </main>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,873 @@
+html, body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+  color: #222;
+  transition: background 0.3s, color 0.3s;
+  min-height: 100vh;
+}
+body.dark, html.dark {
+  background: linear-gradient(135deg, #232526 0%, #414345 100%) !important;
+  color: #f4f6fb;
+}
+
+header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1.5rem 2rem !important;
+  height: auto !important;
+  min-height: 90px !important;
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.08) !important;
+  margin-bottom: 0 !important;
+  background: none !important;
+  background: rgba(255,255,255,0.7) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  border-radius: 22px !important;
+}
+
+main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  border-top: 1.5px solid #e0e0e0;
+  border-bottom: 1.5px solid #e0e0e0;
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+section {
+  background: none !important;
+  background: rgba(255,255,255,0.7) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  padding: 1.2rem 1rem;
+}
+body.dark section {
+  background: none !important;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%) !important;
+  color: #f4f6fb;
+}
+
+#theme-toggle {
+  background: #f4f6fb;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  transition: background 0.2s, border 0.2s, color 0.2s;
+  color: #222;
+}
+#theme-toggle:hover {
+  background: #ffe7f7;
+  border-color: #b1d6ff;
+}
+body.dark #theme-toggle {
+  background: #232323;
+  border: 1px solid #444;
+  color: #ffe066;
+}
+body.dark #theme-toggle:hover {
+  background: #444;
+  border-color: #fff9b1;
+}
+
+body.dark {
+  background: none !important;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%) !important;
+  color: #f4f6fb;
+}
+
+body.dark header, body.dark section {
+  background: none !important;
+  background: rgba(30, 34, 45, 0.7) !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.28) !important;
+  color: #f4f6fb !important;
+}
+
+#todo-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+#todo-controls button {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background: #e0e4ea;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#todo-controls button.active {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+}
+#todo-controls #task-count {
+  margin-left: auto;
+  font-weight: bold;
+}
+#clear-all {
+  background: #ff4f4f;
+  color: #fff;
+}
+#todo, #notes, #weather, #links {
+  height: 500px;
+  max-height: 500px;
+  overflow: hidden;
+}
+#todo:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  transform: translateY(-2px) scale(1.01);
+}
+#tasks {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
+  min-height: 60px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd #f4f6fb;
+  transition: box-shadow 0.3s, transform 0.2s, background 0.3s, color 0.3s;
+}
+#tasks:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  transform: translateY(-2px) scale(1.01);
+}
+#tasks::-webkit-scrollbar, #notes-list::-webkit-scrollbar {
+  width: 10px;
+  background: #f4f6fb;
+}
+#tasks::-webkit-scrollbar-thumb, #notes-list::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 6px;
+}
+body.dark #tasks, body.dark #notes-list {
+  background: none !important;
+  background: transparent !important;
+  color: #f4f6fb !important;
+}
+body.dark #tasks::-webkit-scrollbar, body.dark #notes-list::-webkit-scrollbar {
+  background: rgba(40,44,54,0.7) !important;
+}
+body.dark #tasks::-webkit-scrollbar-thumb, body.dark #notes-list::-webkit-scrollbar-thumb {
+  background: #444 !important;
+  border-radius: 6px;
+  border: 2px solid rgba(255,255,255,0.08) !important;
+}
+#tasks li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #eee;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.3s, color 0.3s, opacity 0.3s;
+}
+#tasks li:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  transform: translateY(-2px) scale(1.01);
+}
+#tasks li.completed {
+  text-decoration: line-through;
+  color: #aaa;
+  opacity: 0.7;
+}
+body.dark #tasks li.completed {
+  color: #888;
+  opacity: 0.6;
+}
+.task-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+.task-actions button {
+  background: #e0e4ea;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.1rem 0.4rem;
+}
+.task-actions button.edit {
+  background: #ffd24f;
+}
+.task-actions button.up, .task-actions button.down {
+  background: #b3e0ff;
+}
+.task-actions button:active {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+}
+
+#notes-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+#notes-controls input {
+  flex: 1;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+#notes-controls button {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background: #e0e4ea;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#notes-list, #weather-info, #links-groups {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 60px;
+  max-height: 400px;
+  margin: 0;
+  padding: 0;
+}
+#notes-list {
+  margin-top: 1rem;
+}
+#links-groups {
+  margin-top: 1rem;
+}
+#weather-info {
+  margin-top: 1rem;
+}
+/* Ensure Quick Notes, Weather, and Quick Links do not expand beyond card height */
+#notes, #weather, #links {
+  display: flex;
+  flex-direction: column;
+}
+/* Make sure add note/export, search, and add link controls do not scroll */
+#notes-controls, #weather-controls, #links-controls {
+  flex-shrink: 0;
+}
+.note-card {
+  background: none !important;
+  background: rgba(255,255,255,0.7) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1.5px 3px rgba(0,0,0,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  padding: 0.8rem 1rem;
+  min-width: 220px;
+  max-width: 320px;
+  min-height: 120px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  resize: none;
+  overflow: hidden;
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  transform: rotate(-2deg);
+  margin-left: 10px;
+  margin-right: 10px;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.3s, color 0.3s, opacity 0.3s;
+  color: #222;
+  opacity: 1;
+}
+.note-card:nth-child(2n) {
+  transform: rotate(2deg);
+}
+.note-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  transform: translateY(-2px) scale(1.01);
+}
+.note-card .note-actions {
+  display: flex;
+  gap: 0.3rem;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+.note-card .note-actions button {
+  background: #e0e4ea;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.1rem 0.4rem;
+}
+.note-card .note-actions button.pin {
+  background: #ffd24f;
+}
+.note-card .note-actions button.delete {
+  background: #ff4f4f;
+  color: #fff;
+}
+.note-card .note-actions button.color {
+  background: #b3e0ff;
+}
+.note-card .note-content {
+  background: transparent !important;
+  color: inherit !important;
+  border: none !important;
+  outline: none !important;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Segoe Print', 'Segoe Script', cursive, sans-serif !important;
+  box-shadow: none !important;
+  resize: vertical !important;
+  width: 100% !important;
+  min-height: 60px !important;
+  padding: 0.7em 1em !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 1.1em !important;
+  box-sizing: border-box !important;
+}
+.note-card .note-content:focus {
+  border: 1.5px solid #1976d2 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.note-card .note-markdown {
+  font-size: 0.98em;
+  margin-top: 0.5rem;
+  color: #333;
+  font-family: inherit;
+}
+/* Color coding for notes */
+.note-card.color-yellow { background: #fffbe7 !important; color: #222 !important; }
+.note-card.color-blue { background: #e7f0ff !important; color: #222 !important; }
+.note-card.color-green { background: #e7ffe7 !important; color: #222 !important; }
+.note-card.color-pink { background: #ffe7f7 !important; color: #222 !important; }
+.note-card.color-purple { background: #f3e7ff !important; color: #222 !important; }
+
+/* Softer pastel sticky note colors for dark mode */
+body.dark .note-card {
+  background: none !important;
+  background: rgba(60, 70, 90, 0.72) !important;
+  border: 1.5px solid rgba(255,255,255,0.10) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+}
+body.dark .note-card.color-yellow { background: #bfae6a !important; color: #fff !important; }
+body.dark .note-card.color-blue { background: #4a6fa5 !important; color: #fff !important; }
+body.dark .note-card.color-green { background: #4a9a6f !important; color: #fff !important; }
+body.dark .note-card.color-pink { background: #b96fa5 !important; color: #fff !important; }
+body.dark .note-card.color-purple { background: #7a6fa5 !important; color: #fff !important; }
+body.dark .note-card .note-content { color: #fff !important; background: transparent !important; }
+
+/* Smooth dark mode transitions for body and cards */
+body, .note-card, section, header, #main-header {
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+#weather-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+#weather-controls input {
+  flex: 1;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+#weather-controls button {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background: #e0e4ea;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#weather-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 1.1em;
+  min-height: 60px;
+}
+.weather-icon {
+  width: 48px;
+  height: 48px;
+}
+.weather-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+#links-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+#links-controls input {
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #222;
+  transition: background 0.2s, color 0.2s;
+}
+body.dark #links-controls input {
+  background: #232323;
+  color: #f4f6fb;
+  border: 1px solid #444;
+}
+#links-controls button {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background: #e0e4ea;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+body.dark #links-controls button {
+  background: #444;
+  color: #f4f6fb;
+}
+#links-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.link-group {
+  border-left: 8px solid #ffd24f;
+  padding-left: 0.7rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255,255,255,0.85);
+  transition: border-color 0.3s, background 0.3s;
+}
+body.dark .link-group {
+  background: rgba(30,30,30,0.60);
+  border-left-width: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.link-group.color-0 { border-color: #ffd24f; }
+.link-group.color-1 { border-color: #90caf9; }
+.link-group.color-2 { border-color: #b2f2bb; }
+.link-group.color-3 { border-color: #ffb1e1; }
+.link-group.color-4 { border-color: #d6b1ff; }
+.link-group.color-5 { border-color: #ffe066; }
+.link-group.color-6 { border-color: #b1d6ff; }
+.link-group.color-7 { border-color: #caffb1; }
+.link-group.color-8 { border-color: #f3e7ff; }
+.link-group.color-9 { border-color: #ffb1b1; }
+.link-group-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-size: 1.1em;
+  letter-spacing: 0.5px;
+  padding: 0.2em 0.5em;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+body.dark .link-group-title {
+  color: #fff;
+}
+.links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.link-card {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 0.5em !important;
+  background: none !important;
+  background: rgba(255,255,255,0.7) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  padding: 0.8rem 1rem;
+  cursor: grab;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.3s, color 0.3s, opacity 0.3s;
+  margin-bottom: 0.2rem;
+  opacity: 1;
+}
+body.dark .link-card {
+  background: none !important;
+  background: rgba(40, 44, 54, 0.82) !important;
+  border: 1.5px solid rgba(255,255,255,0.08) !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.22) !important;
+  color: #f4f6fb !important;
+}
+.link-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  transform: translateY(-2px) scale(1.01);
+}
+.link-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: #e0e4ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+}
+.link-card input[type="text"] {
+  max-width: 100% !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  margin-right: 0.5em !important;
+  box-sizing: border-box !important;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0.1rem 0.3rem;
+  font-size: 1em;
+  background: #fff;
+  color: #222;
+  transition: background 0.2s, color 0.2s;
+}
+body.dark .link-card input[type="text"] {
+  background: #232323;
+  color: #f4f6fb;
+  border: 1px solid #444;
+}
+.link-card a {
+  color: #1976d2;
+  font-weight: 500;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+body.dark .link-card a {
+  color: #90caf9;
+}
+.link-actions {
+  display: flex !important;
+  gap: 0.2em !important;
+  flex-shrink: 0 !important;
+  margin-left: auto;
+}
+.link-actions button {
+  background: #e0e4ea;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1em;
+  padding: 0.1rem 0.4rem;
+  transition: background 0.2s, color 0.2s;
+}
+.link-actions button.delete {
+  background: #ff4f4f;
+  color: #fff;
+}
+.link-actions button.edit {
+  background: #ffd24f;
+}
+.link-actions button.up, .link-actions button.down {
+  background: #b3e0ff;
+}
+body.dark .link-actions button {
+  background: rgba(60, 70, 90, 0.7) !important;
+  color: #ffe066 !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10) !important;
+}
+body.dark .link-actions button.delete {
+  background: #ff4f4f;
+  color: #fff;
+}
+body.dark .link-actions button.edit {
+  background: #ffd24f;
+  color: #222;
+}
+body.dark .link-actions button.up, body.dark .link-actions button.down {
+  background: #90caf9;
+  color: #222;
+}
+
+#greeting {
+  font-size: 1.2em;
+  font-weight: 500;
+  margin-right: 1.5rem;
+}
+#timezone-select {
+  margin-left: 1rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+body.morning, body.afternoon, body.evening, body.night {
+  background: none !important;
+}
+
+#main-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1.5rem 2rem !important;
+  height: auto !important;
+  min-height: 90px !important;
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.08) !important;
+  margin-bottom: 0 !important;
+  background: none !important;
+  background: rgba(255,255,255,0.7) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-radius: 22px !important;
+}
+.header-left, .header-center, .header-right {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+.header-center {
+  flex: 1 1 auto !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+.header-left {
+  min-width: 200px !important;
+  justify-content: flex-start !important;
+}
+.header-right {
+  gap: 1.5rem !important;
+  justify-content: flex-end !important;
+}
+@media (max-width: 900px) {
+  #main-header, header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 1rem 0.5rem !important;
+    min-height: unset !important;
+  }
+  .header-center {
+    justify-content: center !important;
+    margin: 0.5rem 0 !important;
+  }
+  .header-left, .header-right {
+    justify-content: flex-start !important;
+    min-width: unset !important;
+    gap: 1rem !important;
+  }
+}
+
+/* Stylish Clock and Date */
+#clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  margin: 0 1rem;
+}
+.clock-time {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #222;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.clock-date {
+  color: #555 !important;
+  font-weight: 500 !important;
+  font-size: 1.1rem;
+  margin-top: 0.2rem;
+}
+body.dark .clock-date {
+  color: #b3e5fc !important;
+}
+
+/* Dark Theme Fixes */
+body.dark #main-header,
+body.dark header,
+body.dark section,
+body.dark .note-card,
+body.dark .link-card,
+body.dark .link-group {
+  background: rgba(44, 62, 80, 0.75) !important;
+  color: #f4f6fb !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.28) !important;
+  border-radius: 18px !important;
+}
+body.dark input,
+body.dark textarea,
+body.dark select {
+  background: rgba(44, 62, 80, 0.85) !important;
+  color: #f4f6fb !important;
+  border: 1px solid #5a7fa8 !important;
+}
+body.dark button,
+body.dark #todo-controls button,
+body.dark #notes-controls button,
+body.dark #weather-controls button,
+body.dark #links-controls button,
+body.dark .task-actions button,
+body.dark .note-actions button,
+body.dark .link-actions button {
+  background: #1976d2 !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10) !important;
+}
+body.dark .link-card, body.dark .link-group {
+  background: rgba(44, 62, 80, 0.75) !important;
+  color: #f4f6fb !important;
+}
+body.dark .link-card input[type="text"] {
+  background: rgba(44, 62, 80, 0.85) !important;
+  color: #f4f6fb !important;
+  border: 1px solid #5a7fa8 !important;
+}
+body.dark .note-card .note-content {
+  background: transparent !important;
+  color: #f4f6fb !important;
+}
+body.dark .link-group-title {
+  color: #fff;
+}
+
+/* Card hover effects for all sections */
+#notes, #weather, #links {
+  transition: box-shadow 0.3s, transform 0.2s, background 0.3s, color 0.3s;
+}
+#notes:hover, #weather:hover, #links:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* Subtle section dividers */
+body.dark main {
+  border-top: 1.5px solid #333;
+  border-bottom: 1.5px solid #333;
+}
+
+/* Animated transitions for adding/removing cards or notes */
+.note-card, .link-card, #tasks li {
+  transition: box-shadow 0.2s, transform 0.2s, background 0.3s, color 0.3s, opacity 0.3s;
+}
+.note-card, .link-card, #tasks li {
+  opacity: 1;
+}
+.note-card.removing, .link-card.removing, #tasks li.removing {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* Settings button style */
+#settings-btn {
+  background: #e0e4ea;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  margin-left: 1rem;
+  transition: background 0.2s, color 0.2s;
+  color: #222;
+}
+#settings-btn:hover {
+  background: #ffd24f;
+  color: #222;
+}
+body.dark #settings-btn {
+  background: rgba(40,44,54,0.7);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #ffe066;
+}
+body.dark #settings-btn:hover {
+  background: rgba(255,255,255,0.10);
+  color: #ffd24f;
+}
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  #todo, #notes, #weather, #links {
+    min-width: 0;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+    padding: 1rem;
+  }
+  .note-card, .link-card {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 1em;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  #tasks, #notes-list {
+    max-height: 250px;
+  }
+}
+@media (max-width: 600px) {
+  #main-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.7rem 0.5rem;
+  }
+  .header-center {
+    justify-content: flex-start;
+  }
+  #todo, #notes, #weather, #links {
+    padding: 0.7rem;
+    font-size: 0.98em;
+  }
+  .note-card, .link-card {
+    font-size: 0.97em;
+    padding: 0.7rem 0.5rem;
+  }
+  .link-group-title {
+    font-size: 1em;
+    padding: 0.15em 0.3em;
+  }
+}
+
+/* Remove all blur effects from dark mode */
+body.dark #main-header, body.dark header, body.dark section, body.dark .note-card, body.dark .link-card, body.dark .link-group, body.dark #theme-toggle, body.dark #settings-btn, body.dark .link-actions button, body.dark #todo, body.dark #notes, body.dark #weather, body.dark #links {
+  backdrop-filter: none !important;
+}
+
+:root {
+  --accent-blue: #4facfe;
+}
+
+#name-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 9999;
+}
+#name-modal[aria-modal="true"] > div {
+  background: #fff;
+  color: #222;
+  border-radius: 12px;
+  padding: 2em;
+  max-width: 350px;
+  margin: 10vh auto;
+  box-shadow: 0 8px 32px rgba(31,38,135,0.18);
+  text-align: center;
+}
+#name-input {
+  margin: 1em 0;
+  padding: 0.5em;
+  width: 80%;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+#name-submit {
+  padding: 0.5em 1.5em;
+  border-radius: 6px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+} 
