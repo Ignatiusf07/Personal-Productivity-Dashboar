@@ -870,4 +870,54 @@ body.dark #main-header, body.dark header, body.dark section, body.dark .note-car
   color: #fff;
   border: none;
   cursor: pointer;
+}
+
+/* Custom scrollbar for Quick Links in dark mode */
+body.dark #links-groups {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90,110,130,0.7) transparent;
+}
+body.dark #links-groups::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+body.dark #links-groups::-webkit-scrollbar-thumb {
+  background: rgba(90, 110, 130, 0.7);
+  border-radius: 8px;
+  border: 2px solid rgba(34, 51, 68, 0.7);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: background 0.2s;
+}
+body.dark #links-groups::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 140, 160, 0.85);
+}
+
+body.dark #tasks,
+body.dark #notes-list,
+body.dark #links-groups {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90,110,130,0.7) transparent;
+}
+
+body.dark #tasks::-webkit-scrollbar,
+body.dark #notes-list::-webkit-scrollbar,
+body.dark #links-groups::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+body.dark #tasks::-webkit-scrollbar-thumb,
+body.dark #notes-list::-webkit-scrollbar-thumb,
+body.dark #links-groups::-webkit-scrollbar-thumb {
+  background: rgba(90, 110, 130, 0.7);
+  border-radius: 8px;
+  border: 2px solid rgba(34, 51, 68, 0.7);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: background 0.2s;
+}
+
+body.dark #tasks::-webkit-scrollbar-thumb:hover,
+body.dark #notes-list::-webkit-scrollbar-thumb:hover,
+body.dark #links-groups::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 140, 160, 0.85);
 } 

@@ -482,10 +482,10 @@ function renderLinks() {
   const links = getLinks();
   // Group by group name
   const groups = {};
-  links.forEach((link, idx) => {
+  links.forEach((link) => {
     const group = link.group || 'Ungrouped';
     if (!groups[group]) groups[group] = [];
-    groups[group].push({ ...link, idx });
+    groups[group].push(link);
   });
   const collapsedGroups = getCollapsedGroups();
   linksGroupsDiv.innerHTML = '';
@@ -520,38 +520,55 @@ function renderLinks() {
         card.draggable = true;
         card.ondragstart = e => {
           card.classList.add('dragging');
-          e.dataTransfer.setData('text/plain', link.idx);
+          e.dataTransfer.setData('text/plain', link.id);
         };
         card.ondragend = () => card.classList.remove('dragging');
         card.ondragover = e => e.preventDefault();
         card.ondrop = e => {
           e.preventDefault();
-          const fromIdx = +e.dataTransfer.getData('text/plain');
-          moveLink(fromIdx, link.idx);
+          const fromId = e.dataTransfer.getData('text/plain');
+          moveLinkById(fromId, link.id);
         };
         // Icon (favicon only)
         const icon = document.createElement('img');
         icon.className = 'link-icon';
         icon.src = getFavicon(link.url);
         icon.alt = '';
-        icon.onerror = () => { icon.src = ''; icon.textContent = '🔗'; };
+        icon.onerror = function() {
+          if (!this.dataset.fallback) {
+            try {
+              const u = new URL(link.url);
+              this.src = `https://www.google.com/s2/favicons?sz=64&domain_url=${u.origin}`;
+              this.dataset.fallback = '1';
+            } catch {
+              this.src = '';
+              this.alt = '🔗';
+            }
+          } else {
+            this.style.display = 'none';
+            const fallback = document.createElement('span');
+            fallback.className = 'link-icon-fallback';
+            fallback.textContent = '🔗';
+            this.parentNode.insertBefore(fallback, this);
+          }
+        };
         card.appendChild(icon);
         // Name (editable)
         if (link.editing) {
           const nameInput = document.createElement('input');
           nameInput.type = 'text';
           nameInput.value = escapeHtml(link.name);
-          nameInput.onkeydown = e => { if (e.key === 'Enter') finishEdit(link.idx, nameInput.value, null, null); };
+          nameInput.onkeydown = e => { if (e.key === 'Enter') finishEditById(link.id, nameInput.value, null, null); };
           card.appendChild(nameInput);
           const urlInput = document.createElement('input');
           urlInput.type = 'text';
           urlInput.value = escapeHtml(link.url);
-          urlInput.onkeydown = e => { if (e.key === 'Enter') finishEdit(link.idx, null, urlInput.value, null); };
+          urlInput.onkeydown = e => { if (e.key === 'Enter') finishEditById(link.id, null, urlInput.value, null); };
           card.appendChild(urlInput);
           const groupInput = document.createElement('input');
           groupInput.type = 'text';
           groupInput.value = escapeHtml(link.group || '');
-          groupInput.onkeydown = e => { if (e.key === 'Enter') finishEdit(link.idx, null, null, groupInput.value); };
+          groupInput.onkeydown = e => { if (e.key === 'Enter') finishEditById(link.id, null, null, groupInput.value); };
           card.appendChild(groupInput);
         } else {
           const a = document.createElement('a');
@@ -568,19 +585,19 @@ function renderLinks() {
         const editBtn = document.createElement('button');
         editBtn.textContent = '✎';
         editBtn.className = 'edit';
-        editBtn.onclick = () => startEdit(link.idx);
+        editBtn.onclick = () => startEditById(link.id);
         actions.appendChild(editBtn);
         // Up
         const upBtn = document.createElement('button');
         upBtn.textContent = '↑';
         upBtn.className = 'up';
-        upBtn.onclick = () => moveLink(link.idx, link.idx - 1);
+        upBtn.onclick = () => moveLinkById(link.id, getRelativeLinkId(links, link.id, -1));
         actions.appendChild(upBtn);
         // Down
         const downBtn = document.createElement('button');
         downBtn.textContent = '↓';
         downBtn.className = 'down';
-        downBtn.onclick = () => moveLink(link.idx, link.idx + 1);
+        downBtn.onclick = () => moveLinkById(link.id, getRelativeLinkId(links, link.id, 1));
         actions.appendChild(downBtn);
         // Delete
         const deleteBtn = document.createElement('button');
@@ -588,13 +605,7 @@ function renderLinks() {
         deleteBtn.className = 'delete';
         deleteBtn.onclick = () => {
           if (confirm('Are you sure you want to delete this link?')) {
-            const links = getLinks();
-            const idx = links.findIndex(n => n.idx === link.idx);
-            if (idx !== -1) {
-              links.splice(idx, 1);
-              saveLinks(links);
-              renderLinks();
-            }
+            deleteLinkById(link.id);
           }
         };
         actions.appendChild(deleteBtn);
@@ -610,9 +621,7 @@ function addLink() {
   const name = newLinkName.value.trim();
   const url = newLinkUrl.value.trim();
   const group = newLinkGroup.value.trim();
-  
   if (!name || !url) {
-    // Show visual feedback for missing required fields
     if (!name) {
       newLinkName.style.borderColor = '#ff4444';
       setTimeout(() => { newLinkName.style.borderColor = ''; }, 1000);
@@ -623,8 +632,6 @@ function addLink() {
     }
     return;
   }
-  
-  // Basic URL validation
   try {
     new URL(url);
   } catch {
@@ -632,9 +639,8 @@ function addLink() {
     setTimeout(() => { newLinkUrl.style.borderColor = ''; }, 1000);
     return;
   }
-  
   const links = getLinks();
-  links.push({ name, url, group });
+  links.push({ id: Date.now() + Math.random(), name, url, group });
   saveLinks(links);
   newLinkName.value = '';
   newLinkUrl.value = '';
@@ -801,3 +807,239 @@ function escapeHtml(str) {
 // Example: span.textContent = escapeHtml(task.text);
 // For notes: textarea.value = escapeHtml(note.text);
 // For links: a.textContent = escapeHtml(link.name); a.href = escapeHtml(link.url); 
+
+// --- Migration: Ensure all links have a unique id on load ---
+(function migrateQuickLinks() {
+  const links = getLinks();
+  let changed = false;
+  links.forEach(link => {
+    if (!link.id) {
+      link.id = Date.now() + Math.random();
+      changed = true;
+    }
+  });
+  if (changed) saveLinks(links);
+})();
+
+// --- Add unique id to each new link ---
+function addLink() {
+  const name = newLinkName.value.trim();
+  const url = newLinkUrl.value.trim();
+  const group = newLinkGroup.value.trim();
+  if (!name || !url) {
+    if (!name) {
+      newLinkName.style.borderColor = '#ff4444';
+      setTimeout(() => { newLinkName.style.borderColor = ''; }, 1000);
+    }
+    if (!url) {
+      newLinkUrl.style.borderColor = '#ff4444';
+      setTimeout(() => { newLinkUrl.style.borderColor = ''; }, 1000);
+    }
+    return;
+  }
+  try {
+    new URL(url);
+  } catch {
+    newLinkUrl.style.borderColor = '#ff4444';
+    setTimeout(() => { newLinkUrl.style.borderColor = ''; }, 1000);
+    return;
+  }
+  const links = getLinks();
+  links.push({ id: Date.now() + Math.random(), name, url, group });
+  saveLinks(links);
+  newLinkName.value = '';
+  newLinkUrl.value = '';
+  newLinkGroup.value = '';
+  renderLinks();
+}
+
+// --- Update renderLinks to use link.id for all actions ---
+function renderLinks() {
+  const links = getLinks();
+  // Group by group name
+  const groups = {};
+  links.forEach((link) => {
+    const group = link.group || 'Ungrouped';
+    if (!groups[group]) groups[group] = [];
+    groups[group].push(link);
+  });
+  const collapsedGroups = getCollapsedGroups();
+  linksGroupsDiv.innerHTML = '';
+  Object.entries(groups).forEach(([group, links]) => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = `link-group ${groupColorClass(group)}`;
+    const title = document.createElement('div');
+    title.className = 'link-group-title';
+    // Collapsible toggle
+    const toggle = document.createElement('button');
+    toggle.textContent = collapsedGroups[group] ? '▶' : '▼';
+    toggle.style.marginRight = '0.5em';
+    toggle.style.background = 'none';
+    toggle.style.border = 'none';
+    toggle.style.fontSize = '1em';
+    toggle.style.cursor = 'pointer';
+    toggle.onclick = () => {
+      const collapsed = getCollapsedGroups();
+      collapsed[group] = !collapsed[group];
+      setCollapsedGroups(collapsed);
+      renderLinks();
+    };
+    title.prepend(toggle);
+    title.append(escapeHtml(group));
+    groupDiv.appendChild(title);
+    const list = document.createElement('div');
+    list.className = 'links-list';
+    if (!collapsedGroups[group]) {
+      links.forEach((link, i) => {
+        const card = document.createElement('div');
+        card.className = 'link-card';
+        card.draggable = true;
+        card.ondragstart = e => {
+          card.classList.add('dragging');
+          e.dataTransfer.setData('text/plain', link.id);
+        };
+        card.ondragend = () => card.classList.remove('dragging');
+        card.ondragover = e => e.preventDefault();
+        card.ondrop = e => {
+          e.preventDefault();
+          const fromId = e.dataTransfer.getData('text/plain');
+          moveLinkById(fromId, link.id);
+        };
+        // Icon (favicon only)
+        const icon = document.createElement('img');
+        icon.className = 'link-icon';
+        icon.src = getFavicon(link.url);
+        icon.alt = '';
+        icon.onerror = function() {
+          if (!this.dataset.fallback) {
+            try {
+              const u = new URL(link.url);
+              this.src = `https://www.google.com/s2/favicons?sz=64&domain_url=${u.origin}`;
+              this.dataset.fallback = '1';
+            } catch {
+              this.src = '';
+              this.alt = '🔗';
+            }
+          } else {
+            this.style.display = 'none';
+            const fallback = document.createElement('span');
+            fallback.className = 'link-icon-fallback';
+            fallback.textContent = '🔗';
+            this.parentNode.insertBefore(fallback, this);
+          }
+        };
+        card.appendChild(icon);
+        // Name (editable)
+        if (link.editing) {
+          const nameInput = document.createElement('input');
+          nameInput.type = 'text';
+          nameInput.value = escapeHtml(link.name);
+          nameInput.onkeydown = e => { if (e.key === 'Enter') finishEditById(link.id, nameInput.value, null, null); };
+          card.appendChild(nameInput);
+          const urlInput = document.createElement('input');
+          urlInput.type = 'text';
+          urlInput.value = escapeHtml(link.url);
+          urlInput.onkeydown = e => { if (e.key === 'Enter') finishEditById(link.id, null, urlInput.value, null); };
+          card.appendChild(urlInput);
+          const groupInput = document.createElement('input');
+          groupInput.type = 'text';
+          groupInput.value = escapeHtml(link.group || '');
+          groupInput.onkeydown = e => { if (e.key === 'Enter') finishEditById(link.id, null, null, groupInput.value); };
+          card.appendChild(groupInput);
+        } else {
+          const a = document.createElement('a');
+          a.href = escapeHtml(link.url);
+          a.textContent = escapeHtml(link.name);
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          card.appendChild(a);
+        }
+        // Actions
+        const actions = document.createElement('div');
+        actions.className = 'link-actions';
+        // Edit
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '✎';
+        editBtn.className = 'edit';
+        editBtn.onclick = () => startEditById(link.id);
+        actions.appendChild(editBtn);
+        // Up
+        const upBtn = document.createElement('button');
+        upBtn.textContent = '↑';
+        upBtn.className = 'up';
+        upBtn.onclick = () => moveLinkById(link.id, getRelativeLinkId(links, link.id, -1));
+        actions.appendChild(upBtn);
+        // Down
+        const downBtn = document.createElement('button');
+        downBtn.textContent = '↓';
+        downBtn.className = 'down';
+        downBtn.onclick = () => moveLinkById(link.id, getRelativeLinkId(links, link.id, 1));
+        actions.appendChild(downBtn);
+        // Delete
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '✕';
+        deleteBtn.className = 'delete';
+        deleteBtn.onclick = () => {
+          if (confirm('Are you sure you want to delete this link?')) {
+            deleteLinkById(link.id);
+          }
+        };
+        actions.appendChild(deleteBtn);
+        card.appendChild(actions);
+        list.appendChild(card);
+      });
+    }
+    groupDiv.appendChild(list);
+    linksGroupsDiv.appendChild(groupDiv);
+  });
+}
+
+// --- Helper functions for id-based actions ---
+function getRelativeLinkId(links, id, offset) {
+  const idx = links.findIndex(l => l.id === id);
+  if (idx === -1) return null;
+  const newIdx = idx + offset;
+  if (newIdx < 0 || newIdx >= links.length) return null;
+  return links[newIdx].id;
+}
+function moveLinkById(fromId, toId) {
+  if (!toId) return;
+  const links = getLinks();
+  const fromIdx = links.findIndex(l => l.id == fromId);
+  const toIdx = links.findIndex(l => l.id == toId);
+  if (fromIdx === -1 || toIdx === -1) return;
+  const [moved] = links.splice(fromIdx, 1);
+  links.splice(toIdx, 0, moved);
+  saveLinks(links);
+  renderLinks();
+}
+function startEditById(id) {
+  const links = getLinks();
+  const idx = links.findIndex(l => l.id === id);
+  if (idx !== -1) {
+    links[idx].editing = true;
+    saveLinks(links);
+    renderLinks();
+  }
+}
+function finishEditById(id, name, url, group) {
+  const links = getLinks();
+  const idx = links.findIndex(l => l.id === id);
+  if (idx !== -1) {
+    links[idx].editing = false;
+    if (name !== null) links[idx].name = name;
+    if (url !== null) links[idx].url = url;
+    if (group !== null) links[idx].group = group;
+    saveLinks(links);
+    renderLinks();
+  }
+}
+function deleteLinkById(id) {
+  const links = getLinks();
+  const idx = links.findIndex(l => l.id === id);
+  if (idx !== -1) {
+    links.splice(idx, 1);
+    saveLinks(links);
+    renderLinks();
+  }
+} 
